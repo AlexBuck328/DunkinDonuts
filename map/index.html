@@ -92,11 +92,11 @@
 
         // use D3 fetch to request data with async requests
         const stateData = d3.json('./data/statePopCount.geojson');
-        // const colorsData = d3.json('data/vividcolors.json');
+        const colorsData = d3.json('data/vividcolors.json');
         const dunkinData = d3.json('./data/dunkinClean.geojson');
 
         // use Promise to wait until data is all loaded
-        Promise.all([stateData, dunkinData]).then(drawMap); // colorsData,
+        Promise.all([stateData, colorsData, dunkinData]).then(drawMap);
 
 
         function drawMap(data) {
@@ -107,7 +107,7 @@
 
             // pull out separate data arrays and assign to variables
             const states = data[0];
-            //    const colors = data[1];
+            const colors = data[1];
             const dunkinDonuts = data[1];
 
             // convert GeoJSON to Leaflet L.geoJson() object and add to the map
@@ -124,11 +124,11 @@
                 ] + '" href="#">District ' + i + '(<span></span>)</a></li>');
             }
 
-            const statesLayerGroup = L.geoJson(statess, {
+            const statesLayerGroup = L.geoJson(states, {
                 style: function (feature) {
                     // use colors object to style each polygon its own color
                     return {
-                        color: colors.Vivid[10][feature.properties.council_di - 1],
+                        color: colors.Vivid[10][0], // feature.properties.Count - 1
                         fillOpacity: .6
                     }
                 },
@@ -186,14 +186,14 @@
                 });
             }
 
-            // Add Traffic Signals
+            // Add Dunkin Donuts data
             L.geoJson(dunkinDonuts).addTo(map);
 
             // create new markerClusterGroup
             const markers = L.markerClusterGroup();
 
             // loop through all our signals features
-            dunkinDonuts.features.forEach(function (feature) {
+            dunkinDonuts.features.geometry.forEach(function (feature) {
                 // create a new Leaflet marker for each
                 let coords = feature.geometry.coordinates;
                 let marker = L.marker([coords[1], coords[0]]);
