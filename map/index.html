@@ -93,7 +93,7 @@
         // use D3 fetch to request data with async requests
         const stateData = d3.json('./data/statePopCount.geojson');
         // const colorsData = d3.json('data/vividcolors.json');
-        const dunkinData = d3.json('./data/dunkinDonuts2.geojson');
+        const dunkinData = d3.json('./data/dunkinClean.geojson');
 
         // use Promise to wait until data is all loaded
         Promise.all([stateData, dunkinData]).then(drawMap); // colorsData,
