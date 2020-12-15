@@ -110,8 +110,8 @@
             center: [38.7575271, -96.677089],
             zoom: 4.8,
             zoomSnap: .4
-            // zoomControl: False
         }
+        
         // instantiate Leaflet map
         const map = L.map('map', options);
 
@@ -122,20 +122,20 @@
         }).addTo(map);
 
         // use D3 fetch to request data with async requests
-        const stateData = d3.json('./data/statePopCount.geojson') //.then(drawMap);
-        //     const colorsData = d3.json('data/vividcolors.json');
-        const dunkinData = d3.json('./data/dunkinClean.geojson') //.then(drawMap);
+        const stateData = d3.json('./data/statePopCount.geojson')
+        const dunkinData = d3.json('./data/dunkinClean.geojson')
 
         // use Promise to wait until data is all loaded
-        Promise.all([stateData, dunkinData]).then(drawMap); // colorsData,
+        Promise.all([stateData, dunkinData]).then(drawMap);
 
+        // Draw the map!
         function drawMap(data) {
 
+            // Declare data variables
             const states = data[0]
             const dunkinDonuts = data[1]
 
-
-            // Create Colors for States
+            // Create colors for states
             function getColor(d) {
                 return d > 1000 ? '#800026' :
                     d > 500 ? '#BD0026' :
@@ -186,10 +186,10 @@
                 layer.on({
                     mouseover: highlightFeature,
                     mouseout: resetHighlight,
-                    // click: zoomToFeature
                 });
             }
 
+            // States Layer
             const statesLayerGroup = L.geoJson(states, {
                 style: style,
                 onEachFeature: onEachFeature
@@ -211,12 +211,10 @@
                     '<b>' + props.NAME + '</b><br />' + props.Count + '   Dunkin Donuts ' :
                     '<h4>Hover over a state</h4>');
             };
-
-            // Add that nifty info to the map!
             info.addTo(map);
 
 
-            // Legend to show what the State Colors are
+            // Legend to show what the state colors mean
             var legend = L.control({
                 position: 'bottomright'
             });
@@ -237,13 +235,7 @@
             legend.addTo(map);
 
 
-
-
-            // console.log(data)
-            console.log(states)
-            console.log(dunkinDonuts)
-
-            // Add Traffic Signals
+            // Add Dunkin Donuts
             const dunkinLayerGroup = L.geoJson(dunkinDonuts, {
                 pointToLayer: function (feature, ll) {}
             }).addTo(map);
