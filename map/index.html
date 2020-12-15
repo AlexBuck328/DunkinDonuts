@@ -193,7 +193,7 @@
                 var layer = e.target;
 
                 layer.setStyle({
-                    weight: 5,
+                    weight: 3,
                     color: '#666',
                     dashArray: '',
                     fillOpacity: 0.6
@@ -237,8 +237,8 @@
 
             // method that we will use to update the control based on feature properties passed
             info.update = function (props) { // <dd>Dunkin</dd> <dda>\'</dda>
-                this._div.innerHTML = '<h1>Does America Run On <a href="https://www.dunkindonuts.com/en" target="blank">Dunkin\'</a>?</h1>' 
-                + '<h5>Project <a href="https://github.com/AlexBuck328/DunkinDonuts" target="blank">Info</a></h5>'
+                this._div.innerHTML = '<h1>Does America Run On <a href="https://www.dunkindonuts.com/en" target="blank">Dunkin\'</a> ?</h1>' 
+                + '<h5>Project <a href="https://github.com/AlexBuck328/DunkinDonuts" target="blank">Info</a></h5>' 
                 + '<h5>Created by: <a href="https://alexbuck328.github.io/" target="blank">Alexander Buck</a></h5>'
                     + (props ?
                     '<b>' + props.NAME + '</b><br />' + props.Count + '   Dunkin\' Donuts ' :
