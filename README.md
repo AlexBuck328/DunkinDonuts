@@ -16,6 +16,6 @@ Data analysis was performed within Jupyter Notebooks using Pandas, Geopandas and
 
 #### Conclusion
 
-So, *does* "America Run On Dunkin'"?
+So, *does* "America Run On Dunkin'"? There are six states in the northwest that do not have a single Dunkin' Donuts store. From a simply physical store ocation standpoint: no, America does not run on Dunkin'. However, their coffee is packaged and sold at Target, Walgreens, Kroger, and othe major supermarkets. As well as online at [www.dunkindonuts.com](https://www.dunkindonuts.com/en/menu/brew-at-home/packaged-coffee). It can even be purchased on Amazon. While the ability to walk into a Dunkin' Donuts store and order a coffee is limited by geography, it's still possible to have a home brewed cup almost anywhere in the world.  
 
 
