@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>Dunkin Donuts</title>
+    <title>Dunkin\' Donuts</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
     <link rel="stylesheet" href="libs/Leaflet.markercluster/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="libs/Leaflet.markercluster/MarkerCluster.css" />
@@ -68,10 +68,10 @@
             border-radius: 5px;
         }
 
-        .info h2 {
+        .info h1 {
             margin: 0 0 10px;
             color: rgb(27, 26, 26);
-            
+
         }
 
         .info h4 {
@@ -84,12 +84,30 @@
             color: #555;
         }
 
+        #h1a {
+            margin: 0 0 10px;
+            color: #f56200
+        }
+
+        #h1b {
+            margin: 0 0 10px;
+            color: #db0a81
+        }
+
         .legend i {
             width: 18px;
             height: 18px;
             float: left;
             margin-right: 8px;
             opacity: 0.7;
+        }
+
+        #legend {
+            padding: 6px 8px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -109,9 +127,10 @@
         const options = {
             center: [38.7575271, -96.677089],
             zoom: 4.8,
-            zoomSnap: .4
+            zoomSnap: .4,
+            zoomControl: false
         }
-        
+
         // instantiate Leaflet map
         const map = L.map('map', options);
 
@@ -182,6 +201,7 @@
                 info.update();
             }
 
+            // Set the mouseover and mouseout for each feature
             function onEachFeature(feature, layer) {
                 layer.on({
                     mouseover: highlightFeature,
@@ -189,14 +209,14 @@
                 });
             }
 
-            // States Layer
+            // States Layer with UI settings
             const statesLayerGroup = L.geoJson(states, {
                 style: style,
                 onEachFeature: onEachFeature
             }).addTo(map);
 
 
-            // Info Bar at Top Right for User direction prompt and State Dunkin Donut count
+            // Info Bar at Top Right for User direction prompt and State Dunkin' Donut count
             var info = L.control();
 
             info.onAdd = function (map) {
@@ -207,9 +227,9 @@
 
             // method that we will use to update the control based on feature properties passed
             info.update = function (props) {
-                this._div.innerHTML = '<h2>Does America Run On Dunkin?</h2>' + (props ?
-                    '<b>' + props.NAME + '</b><br />' + props.Count + '   Dunkin Donuts ' :
-                    '<h4>Hover over a state</h4>');
+                this._div.innerHTML = '<h1>Does America Run On Dunkin\'?</h1>' + (props ?
+                    '<b>' + props.NAME + '</b><br />' + props.Count + '   Dunkin\' Donuts ' :
+                    '<h4>Hover over a state</h4><br />');
             };
             info.addTo(map);
 
@@ -260,7 +280,118 @@
             // add the markerClusterGroup to the map
             map.addLayer(markers);
 
+            drawZoom()
+
         } // End drawMap()
+
+
+        function drawZoom() {
+
+            // create a new Leaflet control object, and position it bottom left
+            var legend = L.control({
+                position: 'topleft'
+            });
+
+            // when the legend is added to the map
+            legend.onAdd = function () {
+
+                // create a new HTML <div> element and give it a class name of "legend"
+                var div = L.DomUtil.create('div', 'info legend');
+
+                // Add a select drop down. The function is defined below and passes the value in the drop down.
+                div.innerHTML = `<h3>Zoom to Area:</h3>
+            <select id="cars" onchange="selectRegion(this.value)">
+                <option value="AK">Alaska</option>
+                <option value="HI">Hawaii</option>
+                <option value="NW">Northwest</option>
+                <option value="SW">Southwest</option>
+                <option value="MW">Midwest</option>
+                <option value="SE">Southeast</option>
+                <option value="NE">Northeast</option>
+            </select>
+            `;
+                // return the populated div to be added to the map
+                return div;
+            };
+
+            // add the legend to the map
+            legend.addTo(map);
+
+        } //end drawLegend
+
+
+        // View how the map properties change
+        map.on("move", function () {
+            let x = map.getCenter()
+            let y = map.getZoom()
+            console.log(x, y)
+        })
+
+
+        // Define the regions and then fly to them
+        function selectRegion(option) {
+            var regions = {
+                AK: {
+                    zoom: 4.8,
+                    center: {
+                        lat: 62.97339949587449,
+                        lng: -153.09420894081654
+                    }
+                },
+                HI: {
+                    zoom: 6.8,
+                    center: {
+                        lat: 20.492686857351345,
+                        lng: -158.6469988404604
+                    }
+                },
+                NW: {
+                    zoom: 6,
+                    center: {
+                        lat: 45.744526980468436,
+                        lng: -113.09326171875001
+                    }
+                },
+                SW: {
+                    zoom: 6,
+                    center: {
+                        lat: 36.37706783983682,
+                        lng: -111.88476562500001
+                    }
+                },
+                MW: {
+                    zoom: 5.6,
+                    center: {
+                        lat: 39.13333709390997,
+                        lng: -96.7028416776008
+                    }
+                },
+                SE: {
+                    zoom: 6,
+                    center: {
+                        lat: 32.667124733120325,
+                        lng: -84.92431640625001
+                    }
+                },
+                NE: {
+                    zoom: 6.4,
+                    center: {
+                        lat: 43.149847861671596,
+                        lng: -75.9406550084091
+                    }
+                }
+            }
+
+            for (region in regions) {
+                if (region == option) {
+                    map.flyTo(regions[region].center, regions[region].zoom)
+                }
+            }
+
+        } // end selectRegion
+
+
+        
     </script>
 </body>
 
