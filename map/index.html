@@ -68,6 +68,12 @@
             border-radius: 5px;
         }
 
+        .info h2 {
+            margin: 0 0 10px;
+            color: rgb(27, 26, 26);
+            
+        }
+
         .info h4 {
             margin: 0 0 10px;
             color: #777;
@@ -101,8 +107,8 @@
     <script>
         // map options
         const options = {
-            center: [42.520699, -105.820312],
-            zoom: 4,
+            center: [38.7575271, -96.677089],
+            zoom: 4.8,
             zoomSnap: .4
             // zoomControl: False
         }
@@ -201,9 +207,9 @@
 
             // method that we will use to update the control based on feature properties passed
             info.update = function (props) {
-                this._div.innerHTML = '<h4>Does America Run On Dunkin?</h4>' + (props ?
+                this._div.innerHTML = '<h2>Does America Run On Dunkin?</h2>' + (props ?
                     '<b>' + props.NAME + '</b><br />' + props.Count + '   Dunkin Donuts ' :
-                    'Hover over a state');
+                    '<h4>Hover over a state</h4>');
             };
 
             // Add that nifty info to the map!
