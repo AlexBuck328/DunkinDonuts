@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>Dunkin\' Donuts</title>
+    <title>Dunkin' Donuts</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
     <link rel="stylesheet" href="libs/Leaflet.markercluster/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="libs/Leaflet.markercluster/MarkerCluster.css" />
@@ -84,12 +84,22 @@
             color: #555;
         }
 
-        #h1a {
+        .info h5 {
             margin: 0 0 10px;
             color: #f56200
         }
 
-        #h1b {
+        .info a {
+            margin: 0 0 10px;
+            color: #db0a81
+        }
+
+        .info dd {
+           margin: 0 0 10px;
+           color: #f56200
+        }
+
+        .info dda {
             margin: 0 0 10px;
             color: #db0a81
         }
@@ -226,10 +236,14 @@
             };
 
             // method that we will use to update the control based on feature properties passed
-            info.update = function (props) {
-                this._div.innerHTML = '<h1>Does America Run On Dunkin\'?</h1>' + (props ?
+            info.update = function (props) { // <dd>Dunkin</dd> <dda>\'</dda>
+                this._div.innerHTML = '<h1>Does America Run On <a href="https://www.dunkindonuts.com/en" target="blank">Dunkin\'</a>?</h1>' 
+                + '<h5>Project <a href="https://github.com/AlexBuck328/DunkinDonuts" target="blank">Info</a></h5>'
+                + '<h5>Created by: <a href="https://alexbuck328.github.io/" target="blank">Alexander Buck</a></h5>'
+                    + (props ?
                     '<b>' + props.NAME + '</b><br />' + props.Count + '   Dunkin\' Donuts ' :
-                    '<h4>Hover over a state</h4><br />');
+                    '<h4>Hover over a state</h4><br />'
+                    );
             };
             info.addTo(map);
 
@@ -285,11 +299,13 @@
         } // End drawMap()
 
 
+
+        // Zoom to Region
         function drawZoom() {
 
             // create a new Leaflet control object, and position it bottom left
             var legend = L.control({
-                position: 'topleft'
+                position: 'bottomleft'
             });
 
             // when the legend is added to the map
