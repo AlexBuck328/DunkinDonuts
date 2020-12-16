@@ -1,0 +1,413 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Dunkin' Donuts</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+    <link rel="stylesheet" href="libs/Leaflet.markercluster/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="libs/Leaflet.markercluster/MarkerCluster.css" />
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            bottom: 0;
+        }
+
+        #ui {
+            position: absolute;
+            z-index: 1000;
+            /* place above map */
+            bottom: 18px;
+            right: 18px;
+            padding: 6px 12px;
+            background: rgba(256, 256, 256, .9);
+        }
+
+        #ui ul {
+            list-style-type: none;
+            padding: 0;
+            font-weight: 12;
+        }
+
+        #ui li {
+            margin-bottom: 6px;
+        }
+
+        #ui a {
+            text-decoration: none;
+        }
+
+        #ui a:hover {
+            font-weight: bold;
+        }
+
+        .highlight {
+            font-weight: bold;
+        }
+
+        .normal {
+            font-weight: 12;
+        }
+
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .info h1 {
+            margin: 0 0 10px;
+            color: rgb(27, 26, 26);
+
+        }
+
+        .info h4 {
+            margin: 0 0 10px;
+            color: #777;
+        }
+
+        .legend {
+            line-height: 18px;
+            color: #555;
+        }
+
+        .info h5 {
+            margin: 0 0 10px;
+            color: #f56200
+        }
+
+        .info a {
+            margin: 0 0 10px;
+            color: #db0a81
+        }
+
+        .info dd {
+           margin: 0 0 10px;
+           color: #f56200
+        }
+
+        .info dda {
+            margin: 0 0 10px;
+            color: #db0a81
+        }
+
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+
+        #legend {
+            padding: 6px 8px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+    <script src="https://d3js.org/d3-fetch.v1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="libs/Leaflet.markercluster/leaflet.markercluster.js"></script>
+    <script src='https://unpkg.com/simple-statistics@7.0.6/dist/simple-statistics.min.js'></script>
+    <script>
+        // map options
+        const options = {
+            center: [38.7575271, -96.677089],
+            zoom: 4.8,
+            zoomSnap: .4,
+            zoomControl: false
+        }
+
+        // instantiate Leaflet map
+        const map = L.map('map', options);
+
+        // add CARTO voyager tiles with no labels
+        L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager_nolabels/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy;<a href="https://carto.com/attribution">CARTO</a>'
+        }).addTo(map);
+
+        // use D3 fetch to request data with async requests
+        const stateData = d3.json('./data/statePopCount.geojson')
+        const dunkinData = d3.json('./data/dunkinClean.geojson')
+
+        // use Promise to wait until data is all loaded
+        Promise.all([stateData, dunkinData]).then(drawMap);
+
+        // Draw the map!
+        function drawMap(data) {
+
+            // Declare data variables
+            const states = data[0]
+            const dunkinDonuts = data[1]
+
+            // Create colors for states
+            function getColor(d) {
+                return d > 1000 ? '#800026' :
+                    d > 500 ? '#BD0026' :
+                    d > 200 ? '#E31A1C' :
+                    d > 100 ? '#FC4E2A' :
+                    d > 50 ? '#FD8D3C' :
+                    d > 20 ? '#FEB24C' :
+                    d > 10 ? '#FED976' :
+                    '#FFEDA0';
+            }
+
+            // Set the style based on number of Dunkins in the state
+            function style(feature) {
+                return {
+                    fillColor: getColor(feature.properties.Count),
+                    weight: 2,
+                    opacity: 1,
+                    color: 'white',
+                    dashArray: '3',
+                    fillOpacity: 0.6
+                };
+            }
+
+            // Mouseover 
+            function highlightFeature(e) {
+                var layer = e.target;
+
+                layer.setStyle({
+                    weight: 3,
+                    color: '#666',
+                    dashArray: '',
+                    fillOpacity: 0.6
+                });
+
+                if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                    layer.bringToFront();
+                }
+                info.update(layer.feature.properties);
+            }
+
+            // Mouseout
+            function resetHighlight(e) {
+                statesLayerGroup.resetStyle(e.target);
+                info.update();
+            }
+
+            // Set the mouseover and mouseout for each feature
+            function onEachFeature(feature, layer) {
+                layer.on({
+                    mouseover: highlightFeature,
+                    mouseout: resetHighlight,
+                });
+            }
+
+            // States Layer with UI settings
+            const statesLayerGroup = L.geoJson(states, {
+                style: style,
+                onEachFeature: onEachFeature
+            }).addTo(map);
+
+
+            // Info Bar at Top Right for User direction prompt and State Dunkin' Donut count
+            var info = L.control();
+
+            info.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+                this.update();
+                return this._div;
+            };
+
+            // method that we will use to update the control based on feature properties passed
+            info.update = function (props) { // <dd>Dunkin</dd> <dda>\'</dda>
+                this._div.innerHTML = '<h1>Does America Run On <a href="https://www.dunkindonuts.com/en" target="blank">Dunkin\'</a> ?</h1>' 
+                + '<h5>Project <a href="https://github.com/AlexBuck328/DunkinDonuts" target="blank">Info</a></h5>' 
+                + '<h5>Created by: <a href="https://alexbuck328.github.io/" target="blank">Alexander Buck</a></h5>'
+                    + (props ?
+                    '<b>' + props.NAME + '</b><br />' + props.Count + '   Dunkin\' Donuts ' :
+                    '<h4>Hover over a state</h4><br />'
+                    );
+            };
+            info.addTo(map);
+
+
+            // Legend to show what the state colors mean
+            var legend = L.control({
+                position: 'bottomright'
+            });
+
+            legend.onAdd = function (map) {
+
+                var div = L.DomUtil.create('div', 'info legend'),
+                    grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+                    labels = [];
+
+                // loop through our density intervals and generate a label with a colored square for each interval
+                for (var i = 0; i < grades.length; i++) {
+                    div.innerHTML += '<i style="background:' + getColor(grades[i] + 1) +
+                        '"></i> ' + grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+                }
+                return div;
+            };
+            legend.addTo(map);
+
+
+            // Add Dunkin Donuts
+            const dunkinLayerGroup = L.geoJson(dunkinDonuts, {
+                pointToLayer: function (feature, ll) {}
+            }).addTo(map);
+
+            // create new markerClusterGroup
+            const markers = L.markerClusterGroup();
+
+            // loop through all our signals features
+            dunkinDonuts.features.forEach(function (feature) {
+                // create a new Leaflet marker for each
+                let coords = feature.geometry.coordinates;
+                let marker = L.marker([coords[1], coords[0]]);
+
+                // bind a tooltip to the marker
+                marker.bindTooltip(feature.properties.name + '<br>' + feature.properties.address + '<br>' +
+                    feature.properties.city + ', ' + feature.properties.state);
+
+                // add the marker to the markerClusterGroup
+                markers.addLayer(marker);
+
+            });
+            // add the markerClusterGroup to the map
+            map.addLayer(markers);
+
+            drawZoom()
+
+        } // End drawMap()
+
+
+        // Zoom to Region
+        function drawZoom() {
+
+            // create a new Leaflet control object, and position it bottom left
+            var legend = L.control({
+                position: 'bottomleft'
+            });
+
+            // when the legend is added to the map
+            legend.onAdd = function () {
+
+                // create a new HTML <div> element and give it a class name of "info legend"
+                var div = L.DomUtil.create('div', 'info legend');
+
+                // Add a select drop down. The function is defined below and passes the value in the drop down.
+                div.innerHTML = `<h3>Zoom to Area:</h3>
+            <select id="cars" onchange="selectRegion(this.value)">
+                <option value="AK">Alaska</option>
+                <option value="HI">Hawaii</option>
+                <option value="NW">Northwest</option>
+                <option value="SW">Southwest</option>
+                <option value="MW">Midwest</option>
+                <option value="SE">Southeast</option>
+                <option value="NE">Northeast</option>
+            </select>
+            `;
+                // return the populated div to be added to the map
+                return div;
+            };
+
+            // add the zoom to the map
+            legend.addTo(map);
+
+        } // end drawZoom
+
+
+        // View how the map properties change
+        map.on("move", function () {
+            let x = map.getCenter()
+            let y = map.getZoom()
+        //    console.log(x, y)
+        })
+
+
+        // Define the regions and then fly to them
+        function selectRegion(option) {
+            var regions = {
+                AK: {
+                    zoom: 4.8,
+                    center: {
+                        lat: 62.97339949587449,
+                        lng: -153.09420894081654
+                    }
+                },
+                HI: {
+                    zoom: 6.8,
+                    center: {
+                        lat: 20.492686857351345,
+                        lng: -158.6469988404604
+                    }
+                },
+                NW: {
+                    zoom: 6,
+                    center: {
+                        lat: 45.744526980468436,
+                        lng: -113.09326171875001
+                    }
+                },
+                SW: {
+                    zoom: 6,
+                    center: {
+                        lat: 36.37706783983682,
+                        lng: -111.88476562500001
+                    }
+                },
+                MW: {
+                    zoom: 5.6,
+                    center: {
+                        lat: 39.13333709390997,
+                        lng: -96.7028416776008
+                    }
+                },
+                SE: {
+                    zoom: 6,
+                    center: {
+                        lat: 32.667124733120325,
+                        lng: -84.92431640625001
+                    }
+                },
+                NE: {
+                    zoom: 6.4,
+                    center: {
+                        lat: 43.149847861671596,
+                        lng: -75.9406550084091
+                    }
+                }
+            }
+
+            for (region in regions) {
+                if (region == option) {
+                    map.flyTo(regions[region].center, regions[region].zoom)
+                }
+            }
+
+        } // end selectRegion
+
+
+        
+    </script>
+</body>
+
+</html>
