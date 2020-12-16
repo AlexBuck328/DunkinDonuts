@@ -299,7 +299,6 @@
         } // End drawMap()
 
 
-
         // Zoom to Region
         function drawZoom() {
 
@@ -311,7 +310,7 @@
             // when the legend is added to the map
             legend.onAdd = function () {
 
-                // create a new HTML <div> element and give it a class name of "legend"
+                // create a new HTML <div> element and give it a class name of "info legend"
                 var div = L.DomUtil.create('div', 'info legend');
 
                 // Add a select drop down. The function is defined below and passes the value in the drop down.
@@ -330,17 +329,17 @@
                 return div;
             };
 
-            // add the legend to the map
+            // add the zoom to the map
             legend.addTo(map);
 
-        } //end drawLegend
+        } // end drawZoom
 
 
         // View how the map properties change
         map.on("move", function () {
             let x = map.getCenter()
             let y = map.getZoom()
-            console.log(x, y)
+        //    console.log(x, y)
         })
 
 
